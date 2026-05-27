@@ -109,9 +109,13 @@ export async function POST(req: NextRequest) {
   try {
     const { prompt, provider, apiKey } = await req.json();
 
-    if (!apiKey) {
+    // Use client-provided key, or fall back to server-side env var
+    const resolvedKey = apiKey || process.env.AI_API_KEY || '';
+    const resolvedProvider = provider || process.env.AI_PROVIDER || 'anthropic';
+
+    if (!resolvedKey) {
       return NextResponse.json(
-        { error: 'API key is required. Please add your API key in Settings.' },
+        { error: 'AI service is not configured. Please contact support.' },
         { status: 400 }
       );
     }
@@ -122,12 +126,12 @@ export async function POST(req: NextRequest) {
 
     let result: string;
 
-    if (provider === 'gemini') {
-      result = await callGemini(prompt, apiKey);
-    } else if (provider === 'anthropic') {
-      result = await callAnthropic(prompt, apiKey);
+    if (resolvedProvider === 'gemini') {
+      result = await callGemini(prompt, resolvedKey);
+    } else if (resolvedProvider === 'anthropic') {
+      result = await callAnthropic(prompt, resolvedKey);
     } else {
-      result = await callOpenAI(prompt, apiKey);
+      result = await callOpenAI(prompt, resolvedKey);
     }
 
     const cleaned = result

@@ -138,26 +138,18 @@ export default function InvoiceCapturePage() {
     if (file) handleFileSelect(file);
   }, []);
 
-  // Process with AI
+  // Process with AI — calls our server-side API (no client API key needed)
   const processWithAI = async () => {
     setStep('processing');
-
-    if (!settings.apiKey) {
-      setError(lang === 'tr' ? 'Lutfen Ayarlar sayfasindan API anahtarinizi girin.' : 'Please enter your API key in Settings.');
-      setStep('error');
-      return;
-    }
 
     try {
       let base64Data: string;
       let mediaType: string;
 
       if (capturedImage) {
-        // Image from camera or file
         base64Data = capturedImage.split(',')[1];
         mediaType = capturedImage.split(';')[0].split(':')[1] || 'image/jpeg';
       } else if (capturedFile) {
-        // PDF file
         const buffer = await capturedFile.arrayBuffer();
         base64Data = btoa(
           new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
@@ -167,106 +159,25 @@ export default function InvoiceCapturePage() {
         throw new Error('No file to process');
       }
 
-      const prompt = `Bu bir Turk faturasi. Asagidaki bilgileri JSON olarak cikar. Eger fatura degilse null dondur.
-{
-  "invoiceNumber": "fatura numarasi",
-  "fromCompany": "gonderen firma adi",
-  "toCompany": "alici firma adi",
-  "totalAmount": 12345.67,
-  "currency": "TRY",
-  "vatAmount": 1234.56,
-  "subtotal": 11111.11,
-  "issueDate": "2026-01-15",
-  "dueDate": "2026-02-15",
-  "items": [
-    { "description": "kalem aciklamasi", "quantity": 1, "unitPrice": 100, "vatRate": 20, "total": 120 }
-  ]
-}
-Sadece JSON dondur, baska bir sey yazma.`;
+      const res = await fetch('/api/invoice-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64: base64Data, mediaType }),
+      });
 
-      // Build the content for the AI provider
-      let result: string;
+      const data = await res.json();
 
-      if (settings.apiProvider === 'anthropic') {
-        const contentParts = [];
-        if (mediaType.startsWith('image/')) {
-          contentParts.push({
-            type: 'image',
-            source: { type: 'base64', media_type: mediaType, data: base64Data },
-          });
-        } else {
-          contentParts.push({
-            type: 'document',
-            source: { type: 'base64', media_type: 'application/pdf', data: base64Data },
-          });
-        }
-        contentParts.push({ type: 'text', text: prompt });
-
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': settings.apiKey,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 2048,
-            temperature: 0.1,
-            messages: [{ role: 'user', content: contentParts }],
-          }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error?.message || `API error: ${res.status}`);
-        }
-
-        const data = await res.json();
-        result = data.content?.[0]?.text || '';
-      } else if (settings.apiProvider === 'openai') {
-        const contentParts = [];
-        if (mediaType.startsWith('image/')) {
-          contentParts.push({
-            type: 'image_url',
-            image_url: { url: `data:${mediaType};base64,${base64Data}` },
-          });
-        }
-        contentParts.push({ type: 'text', text: prompt });
-
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${settings.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [{ role: 'user', content: contentParts }],
-            temperature: 0.1,
-          }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error?.message || `API error: ${res.status}`);
-        }
-
-        const data = await res.json();
-        result = data.choices?.[0]?.message?.content || '';
-      } else {
-        throw new Error(lang === 'tr' ? 'Gemini goruntu destegi yakinda.' : 'Gemini vision support coming soon.');
+      if (!res.ok) {
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
-      const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      if (cleaned === 'null') {
+      if (!data.result) {
         setError(lang === 'tr' ? 'Bu dosyadan fatura bilgisi cikaramadik.' : 'Could not extract invoice data from this file.');
         setStep('error');
         return;
       }
 
-      const parsed = JSON.parse(cleaned);
-      setExtracted(parsed);
+      setExtracted(data.result);
       setStep('result');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
