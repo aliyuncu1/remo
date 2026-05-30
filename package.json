@@ -1,6 +1,6 @@
 {
-  "name": "sme-workflow-copilot",
-  "version": "0.1.0",
+  "name": "remo",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
