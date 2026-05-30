@@ -139,78 +139,76 @@ export default function InvoicesPage() {
         </div>
       </Card>
 
-      {/* Invoice table */}
-      <Card>
-        {filtered.length === 0 ? (
+      {/* Invoice list */}
+      {filtered.length === 0 ? (
+        <Card>
           <div className="text-center py-12">
             <Receipt className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500">{t('common.noResults', lang)}</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-500 border-b border-gray-100">
-                  <th className="pb-3 font-medium">{t('inv.invoiceNo', lang)}</th>
-                  <th className="pb-3 font-medium">{t('inv.type', lang)}</th>
-                  <th className="pb-3 font-medium">{lang === 'tr' ? 'Yön' : 'Direction'}</th>
-                  <th className="pb-3 font-medium">{t('inv.company', lang)}</th>
-                  <th className="pb-3 font-medium">{t('inv.date', lang)}</th>
-                  <th className="pb-3 font-medium">{t('inv.dueDate', lang)}</th>
-                  <th className="pb-3 font-medium text-right">{t('inv.amount', lang)}</th>
-                  <th className="pb-3 font-medium">{t('inv.status', lang)}</th>
-                  <th className="pb-3 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((inv) => {
-                  const Icon = statusIcons[inv.status] || FileText;
-                  return (
-                    <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50">
-                      <td className="py-3 font-medium text-gray-900">{inv.invoiceNumber}</td>
-                      <td className="py-3">
-                        <span className="text-xs px-2 py-0.5 rounded bg-violet-50 text-violet-700 font-medium">
-                          {inv.type}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          inv.direction === 'incoming' ? 'bg-orange-50 text-orange-700' : 'bg-green-50 text-green-700'
-                        }`}>
-                          {inv.direction === 'incoming' ? (lang === 'tr' ? 'Gelen' : 'In') : (lang === 'tr' ? 'Giden' : 'Out')}
-                        </span>
-                      </td>
-                      <td className="py-3 text-gray-700">
-                        {inv.direction === 'incoming' ? inv.fromCompany : inv.toCompany}
-                      </td>
-                      <td className="py-3 text-gray-600">{inv.issueDate}</td>
-                      <td className="py-3 text-gray-600">{inv.dueDate}</td>
-                      <td className="py-3 text-right font-semibold text-gray-900">
-                        {formatCurrency(inv.totalAmount, inv.currency)}
-                      </td>
-                      <td className="py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[inv.status]}`}>
-                          <Icon className="w-3 h-3" />
-                          {statusLabels[inv.status]}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <button
-                          onClick={() => exportInvoicePDF(inv, lang)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-                          title={lang === 'tr' ? 'PDF İndir' : 'Download PDF'}
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((inv) => {
+            const Icon = statusIcons[inv.status] || FileText;
+            const companyName = inv.direction === 'incoming' ? inv.fromCompany : inv.toCompany;
+            const isOverdue = inv.status === 'overdue';
+            return (
+              <div
+                key={inv.id}
+                className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all ${
+                  isOverdue ? 'border-red-200 bg-red-50/30' : 'border-gray-100'
+                }`}
+              >
+                {/* Top row: company + amount */}
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-gray-900 truncate">{companyName}</h3>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-xs text-gray-500 font-mono">{inv.invoiceNumber}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                        inv.direction === 'incoming' ? 'bg-orange-50 text-orange-700' : 'bg-green-50 text-green-700'
+                      }`}>
+                        {inv.direction === 'incoming' ? (lang === 'tr' ? 'Gelen' : 'Incoming') : (lang === 'tr' ? 'Giden' : 'Outgoing')}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-violet-50 text-violet-700 font-medium">
+                        {inv.type}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-bold text-gray-900">
+                      {formatCurrency(inv.totalAmount, inv.currency)}
+                    </p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[inv.status]}`}>
+                      <Icon className="w-3 h-3" />
+                      {statusLabels[inv.status]}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom row: dates + actions */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>{lang === 'tr' ? 'Tarih' : 'Date'}: {inv.issueDate}</span>
+                    <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
+                      {lang === 'tr' ? 'Vade' : 'Due'}: {inv.dueDate}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => exportInvoicePDF(inv, lang)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-violet-600 hover:bg-violet-50 transition-colors"
+                    title={lang === 'tr' ? 'PDF İndir' : 'Download PDF'}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    PDF
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
