@@ -43,18 +43,25 @@ export default function ReportsPage() {
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
-  const months = lang === 'tr'
-    ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz']
-    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  const monthLabels = lang === 'tr'
+    ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  const monthlyData = [
-    { month: months[0], revenue: 320_000, expenses: 180_000 },
-    { month: months[1], revenue: 480_000, expenses: 220_000 },
-    { month: months[2], revenue: 390_000, expenses: 310_000 },
-    { month: months[3], revenue: 620_000, expenses: 280_000 },
-    { month: months[4], revenue: 710_000, expenses: 350_000 },
-    { month: months[5], revenue: 540_000, expenses: 190_000 },
-  ];
+  const now = new Date();
+  const monthBuckets = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    return { key: `${d.getFullYear()}-${d.getMonth()}`, month: monthLabels[d.getMonth()], revenue: 0, expenses: 0 };
+  });
+  const monthIndex = new Map(monthBuckets.map((b, i) => [b.key, i]));
+  for (const inv of invoices) {
+    const d = new Date(inv.issueDate);
+    if (isNaN(d.getTime())) continue;
+    const idx = monthIndex.get(`${d.getFullYear()}-${d.getMonth()}`);
+    if (idx === undefined) continue;
+    if (inv.direction === 'outgoing') monthBuckets[idx].revenue += inv.totalAmount;
+    else monthBuckets[idx].expenses += inv.totalAmount;
+  }
+  const monthlyData = monthBuckets.map((b) => ({ month: b.month, revenue: b.revenue, expenses: b.expenses }));
 
   return (
     <div>

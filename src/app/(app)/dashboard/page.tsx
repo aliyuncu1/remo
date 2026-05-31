@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useStore } from '@/lib/store';
+import type { Invoice } from '@/lib/types';
 import { t, formatCurrency } from '@/lib/i18n';
 import MetricCard from '@/components/ui/MetricCard';
 import Card from '@/components/ui/Card';
@@ -39,25 +40,30 @@ const activityIcons: Record<string, typeof Receipt> = {
   analysis: Bot,
 };
 
-// Generate synthetic monthly data from invoices
-function generateMonthlyData(lang: 'tr' | 'en') {
-  const months = lang === 'tr'
-    ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz']
-    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+// Build the last 6 months of revenue/expenses from real invoices.
+function generateMonthlyData(invoices: Invoice[], lang: 'tr' | 'en') {
+  const monthLabels = lang === 'tr'
+    ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  const revenueData = [
-    { month: months[0], revenue: 320_000, expenses: 180_000 },
-    { month: months[1], revenue: 480_000, expenses: 220_000 },
-    { month: months[2], revenue: 390_000, expenses: 310_000 },
-    { month: months[3], revenue: 620_000, expenses: 280_000 },
-    { month: months[4], revenue: 710_000, expenses: 350_000 },
-    { month: months[5], revenue: 540_000, expenses: 190_000 },
-  ];
+  const now = new Date();
+  const buckets = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    return { key: `${d.getFullYear()}-${d.getMonth()}`, month: monthLabels[d.getMonth()], revenue: 0, expenses: 0 };
+  });
+  const indexByKey = new Map(buckets.map((b, i) => [b.key, i]));
 
-  const cashFlowData = revenueData.map((d) => ({
-    month: d.month,
-    cashFlow: d.revenue - d.expenses,
-  }));
+  for (const inv of invoices) {
+    const d = new Date(inv.issueDate);
+    if (isNaN(d.getTime())) continue;
+    const idx = indexByKey.get(`${d.getFullYear()}-${d.getMonth()}`);
+    if (idx === undefined) continue;
+    if (inv.direction === 'outgoing') buckets[idx].revenue += inv.totalAmount;
+    else buckets[idx].expenses += inv.totalAmount;
+  }
+
+  const revenueData = buckets.map((b) => ({ month: b.month, revenue: b.revenue, expenses: b.expenses }));
+  const cashFlowData = revenueData.map((d) => ({ month: d.month, cashFlow: d.revenue - d.expenses }));
 
   return { revenueData, cashFlowData };
 }
@@ -87,7 +93,7 @@ export default function DashboardPage() {
   const overdueInvoices = invoices.filter((i) => i.status === 'overdue');
   const recentInvoices = invoices.slice(0, 5);
   const activeOrders = orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled');
-  const { revenueData, cashFlowData } = generateMonthlyData(lang);
+  const { revenueData, cashFlowData } = generateMonthlyData(invoices, lang);
 
   return (
     <div>
