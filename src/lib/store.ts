@@ -37,6 +37,7 @@ interface AppStore {
   // Init
   init: () => void;
   loadDemoData: () => void;
+  clearAllData: () => void;
 
   // Analyses
   addAnalysis: (result: AnalysisResult) => void;
@@ -152,6 +153,26 @@ export const useStore = create<AppStore>((set, get) => ({
       suppliers: demoSuppliers,
       customers: demoCustomers,
       activities: demoActivities,
+      demoLoaded: true,
+    });
+  },
+
+  clearAllData: () => {
+    saveToStorage('sme_invoices', []);
+    saveToStorage('sme_orders', []);
+    saveToStorage('sme_suppliers', []);
+    saveToStorage('sme_customers', []);
+    saveToStorage('sme_activities', []);
+    saveToStorage('sme_analyses', []);
+    // Keep demoLoaded true so init() doesn't repopulate demo data on next load.
+    saveToStorage('sme_demo_loaded', true);
+    set({
+      invoices: [],
+      orders: [],
+      suppliers: [],
+      customers: [],
+      activities: [],
+      analyses: [],
       demoLoaded: true,
     });
   },

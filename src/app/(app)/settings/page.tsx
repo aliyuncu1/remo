@@ -4,7 +4,7 @@ import { useStore } from '@/lib/store';
 import { t } from '@/lib/i18n';
 import Card from '@/components/ui/Card';
 import type { Currency, GmailTokens } from '@/lib/types';
-import { Save, ShieldCheck, RotateCcw, Mail, CheckCircle2, XCircle, Loader2, MessageCircle, Smartphone, ExternalLink } from 'lucide-react';
+import { Save, ShieldCheck, RotateCcw, Mail, CheckCircle2, XCircle, Loader2, MessageCircle, Smartphone, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const settings = useStore((s) => s.settings);
   const updateSettings = useStore((s) => s.updateSettings);
   const loadDemoData = useStore((s) => s.loadDemoData);
+  const clearAllData = useStore((s) => s.clearAllData);
   const gmailConnected = useStore((s) => s.gmailConnected);
   const gmailTokens = useStore((s) => s.gmailTokens);
   const setGmailTokens = useStore((s) => s.setGmailTokens);
@@ -20,6 +21,8 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [gmailError, setGmailError] = useState('');
   const [gmailLoading, setGmailLoading] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [cleared, setCleared] = useState(false);
 
   // Handle OAuth callback - read tokens from URL fragment
   useEffect(() => {
@@ -274,16 +277,46 @@ export default function SettingsPage() {
         </Card>
 
         {/* Demo Data */}
-        <Card title={lang === 'tr' ? 'Demo Verileri' : 'Demo Data'}>
+        <Card title={lang === 'tr' ? 'Veri Yönetimi' : 'Data Management'}>
           <p className="text-sm text-gray-600 mb-3">
             {lang === 'tr'
               ? 'Demo verileri ile platformu keşfedin. Gerçekçi Türk şirket verileri yüklenir.'
               : 'Explore the platform with demo data. Realistic Turkish company data will be loaded.'}
           </p>
-          <button onClick={loadDemoData}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
-            <RotateCcw className="w-4 h-4" /> {lang === 'tr' ? 'Demo Verileri Yükle' : 'Load Demo Data'}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={loadDemoData}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+              <RotateCcw className="w-4 h-4" /> {lang === 'tr' ? 'Demo Verileri Yükle' : 'Load Demo Data'}
+            </button>
+            {!confirmClear ? (
+              <button onClick={() => setConfirmClear(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50">
+                <Trash2 className="w-4 h-4" /> {lang === 'tr' ? 'Tüm Verileri Sil' : 'Clear All Data'}
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => { clearAllData(); setConfirmClear(false); setCleared(true); }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
+                  <AlertTriangle className="w-4 h-4" /> {lang === 'tr' ? 'Emin misiniz? Sil' : 'Are you sure? Delete'}
+                </button>
+                <button onClick={() => setConfirmClear(false)}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+                  {lang === 'tr' ? 'İptal' : 'Cancel'}
+                </button>
+              </div>
+            )}
+          </div>
+          {cleared && (
+            <p className="text-sm text-green-600 mt-3 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              {lang === 'tr' ? 'Tüm veriler silindi. Artık kendi verilerinizle başlayabilirsiniz.' : 'All data cleared. You can now start with your own data.'}
+            </p>
+          )}
+          <p className="text-xs text-gray-400 mt-3">
+            {lang === 'tr'
+              ? 'Tüm faturalar, müşteriler, tedarikçiler ve siparişler kalıcı olarak silinir. Ayarlarınız korunur.'
+              : 'All invoices, customers, suppliers, and orders are permanently deleted. Your settings are kept.'}
+          </p>
         </Card>
 
         {/* Privacy */}

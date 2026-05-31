@@ -10,6 +10,7 @@ export default function OnboardingWizard() {
   const settings = useStore((s) => s.settings);
   const updateSettings = useStore((s) => s.updateSettings);
   const loadDemoData = useStore((s) => s.loadDemoData);
+  const clearAllData = useStore((s) => s.clearAllData);
   const demoLoaded = useStore((s) => s.demoLoaded);
   const lang = settings.language;
 
@@ -19,8 +20,11 @@ export default function OnboardingWizard() {
     if (companyName.trim()) {
       updateSettings({ companyName: companyName.trim() });
     }
-    if (withDemo && !demoLoaded) {
-      loadDemoData();
+    if (withDemo) {
+      if (!demoLoaded) loadDemoData();
+    } else {
+      // init() auto-loads demo data, so "start empty" must explicitly clear it.
+      clearAllData();
     }
     updateSettings({ onboardingComplete: true });
   };
