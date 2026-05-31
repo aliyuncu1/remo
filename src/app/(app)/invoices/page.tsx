@@ -196,7 +196,7 @@ export default function InvoicesPage() {
                     </span>
                   </div>
                   <button
-                    onClick={() => exportInvoicePDF(inv, lang)}
+                    onClick={() => { exportInvoicePDF(inv, lang).catch((e) => console.error('PDF export failed', e)); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-violet-600 hover:bg-violet-50 transition-colors"
                     title={lang === 'tr' ? 'PDF İndir' : 'Download PDF'}
                   >
