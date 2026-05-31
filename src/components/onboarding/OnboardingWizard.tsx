@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import { Building2, Database, Globe, ChevronRight, Check, Sparkles, Camera, FileText, MessageCircle, ArrowRight } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 
 export default function OnboardingWizard() {
   const [step, setStep] = useState(0);
@@ -46,9 +47,7 @@ export default function OnboardingWizard() {
           {step === 0 && (
             <div>
               <div className="text-center mb-8">
-                <div className="w-16 h-16 remo-gradient rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
-                  <span className="text-white font-bold text-2xl">R</span>
-                </div>
+                <Logo size={64} rounded="rounded-2xl" className="mx-auto mb-5 animate-float" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   {lang === 'tr' ? 'Remo\'ya Hos Geldiniz!' : 'Welcome to Remo!'}
                 </h2>

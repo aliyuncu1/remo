@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Logo from '@/components/ui/Logo';
 import {
   Camera,
   MessageCircle,
@@ -23,9 +24,7 @@ export default function LandingPage() {
       <header className="remo-glass fixed top-0 w-full z-50 border-b border-gray-100/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 remo-gradient rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
+            <Logo size={32} rounded="rounded-lg" />
             <span className="font-bold text-gray-900 tracking-tight">Remo</span>
           </div>
           <div className="flex items-center gap-3">
@@ -304,9 +303,7 @@ export default function LandingPage() {
       <footer className="py-10 px-6 border-t border-gray-100">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 remo-gradient rounded flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">R</span>
-            </div>
+            <Logo size={20} rounded="rounded" />
             <span>Remo — KOBİ&apos;ler için AI Fatura Asistanı</span>
           </div>
           <div className="flex gap-6">

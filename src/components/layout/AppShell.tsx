@@ -7,6 +7,7 @@ import { formatCurrency } from '@/lib/i18n';
 import Link from 'next/link';
 import { Menu, Search, X } from 'lucide-react';
 import OnboardingWizard from '../onboarding/OnboardingWizard';
+import Logo from '@/components/ui/Logo';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const init = useStore((s) => s.init);
@@ -99,9 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 remo-gradient rounded-xl flex items-center justify-center mx-auto mb-3 animate-pulse-soft">
-            <span className="text-white font-bold">R</span>
-          </div>
+          <Logo size={40} className="mx-auto mb-3 animate-pulse-soft" />
           <p className="text-sm text-gray-400">Yükleniyor...</p>
         </div>
       </div>
