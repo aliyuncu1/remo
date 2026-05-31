@@ -23,9 +23,8 @@ export default function LandingPage() {
       {/* Header */}
       <header className="remo-glass fixed top-0 w-full z-50 border-b border-gray-100/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Logo size={32} rounded="rounded-lg" />
-            <span className="font-bold text-gray-900 tracking-tight">Remo</span>
+          <div className="flex items-center">
+            <Logo size="text-2xl" />
           </div>
           <div className="flex items-center gap-3">
             <a href="#fiyat" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
@@ -303,8 +302,8 @@ export default function LandingPage() {
       <footer className="py-10 px-6 border-t border-gray-100">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
-            <Logo size={20} rounded="rounded" />
-            <span>Remo — KOBİ&apos;ler için AI Fatura Asistanı</span>
+            <Logo size="text-base" />
+            <span>— KOBİ&apos;ler için AI Fatura Asistanı</span>
           </div>
           <div className="flex gap-6">
             <a href="#nasil" className="hover:text-gray-600">Nasıl Çalışır</a>

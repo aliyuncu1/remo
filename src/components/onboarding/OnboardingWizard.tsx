@@ -47,7 +47,7 @@ export default function OnboardingWizard() {
           {step === 0 && (
             <div>
               <div className="text-center mb-8">
-                <Logo size={64} rounded="rounded-2xl" className="mx-auto mb-5 animate-float" />
+                <Logo size="text-4xl" className="mb-5 animate-float" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   {lang === 'tr' ? 'Remo\'ya Hos Geldiniz!' : 'Welcome to Remo!'}
                 </h2>

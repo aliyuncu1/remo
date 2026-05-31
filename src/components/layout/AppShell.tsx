@@ -100,7 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <Logo size={40} className="mx-auto mb-3 animate-pulse-soft" />
+          <Logo size="text-3xl" className="mb-3 animate-pulse-soft" />
           <p className="text-sm text-gray-400">Yükleniyor...</p>
         </div>
       </div>

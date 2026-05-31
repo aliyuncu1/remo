@@ -51,9 +51,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const sidebarContent = (
     <>
       <div className="h-16 flex items-center px-4 border-b border-gray-200/80 gap-2">
-        <Logo size={32} rounded="rounded-lg" className="shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="font-bold text-gray-900 text-sm block tracking-tight">Remo</span>
+          <Logo size="text-lg" className="block leading-tight" />
           <span className="text-[10px] text-gray-400 block truncate">
             {t('nav.appTagline', lang)}
           </span>
