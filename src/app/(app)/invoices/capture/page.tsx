@@ -78,8 +78,17 @@ export default function InvoiceCapturePage() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [extracted, setExtracted] = useState<ExtractedInvoice | null>(null);
+  const [editing, setEditing] = useState(false);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
+
+  // Update a field on the extracted invoice (used by inline editing).
+  const updateField = <K extends keyof ExtractedInvoice>(field: K, value: ExtractedInvoice[K]) => {
+    setExtracted((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
+  const editInput =
+    'w-full mt-1 px-2 py-1.5 border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500';
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -209,6 +218,7 @@ export default function InvoiceCapturePage() {
       }
 
       setExtracted(data.result);
+      setEditing(false);
       setStep('result');
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Unknown error';
@@ -262,6 +272,7 @@ export default function InvoiceCapturePage() {
     setCapturedImage(null);
     setCapturedFile(null);
     setExtracted(null);
+    setEditing(false);
     setError('');
     setStep('choose');
   };
@@ -585,15 +596,32 @@ export default function InvoiceCapturePage() {
             </h2>
           </div>
 
+          {editing && (
+            <div className="mb-4 flex items-center gap-2 text-xs text-violet-700 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2">
+              <PenLine className="w-3.5 h-3.5 shrink-0" />
+              {lang === 'tr'
+                ? 'AI yanlış okuduysa alanları düzeltebilirsiniz. Bitince "Bitti"ye basın.'
+                : 'Fix any fields the AI got wrong. Press "Done" when finished.'}
+            </div>
+          )}
+
           <Card>
             <div className="space-y-4">
               {/* Invoice header */}
-              <div className="flex justify-between items-start">
-                <div>
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-500">{lang === 'tr' ? 'Fatura No' : 'Invoice No'}</p>
-                  <p className="text-lg font-bold text-gray-900">{extracted.invoiceNumber || '—'}</p>
+                  {editing ? (
+                    <input
+                      value={extracted.invoiceNumber || ''}
+                      onChange={(e) => updateField('invoiceNumber', e.target.value)}
+                      className={editInput}
+                    />
+                  ) : (
+                    <p className="text-lg font-bold text-gray-900">{extracted.invoiceNumber || '—'}</p>
+                  )}
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="text-sm text-gray-500">{lang === 'tr' ? 'Toplam' : 'Total'}</p>
                   <p className="text-2xl font-bold text-violet-600">
                     {extracted.totalAmount?.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
@@ -607,11 +635,27 @@ export default function InvoiceCapturePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Gönderen' : 'From'}</p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{extracted.fromCompany || '—'}</p>
+                  {editing ? (
+                    <input
+                      value={extracted.fromCompany || ''}
+                      onChange={(e) => updateField('fromCompany', e.target.value)}
+                      className={editInput}
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 mt-1">{extracted.fromCompany || '—'}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Alıcı' : 'To'}</p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{extracted.toCompany || '—'}</p>
+                  {editing ? (
+                    <input
+                      value={extracted.toCompany || ''}
+                      onChange={(e) => updateField('toCompany', e.target.value)}
+                      className={editInput}
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 mt-1">{extracted.toCompany || '—'}</p>
+                  )}
                 </div>
               </div>
 
@@ -619,11 +663,29 @@ export default function InvoiceCapturePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Tarih' : 'Date'}</p>
-                  <p className="text-sm text-gray-900 mt-1">{extracted.issueDate || '—'}</p>
+                  {editing ? (
+                    <input
+                      type="date"
+                      value={extracted.issueDate || ''}
+                      onChange={(e) => updateField('issueDate', e.target.value)}
+                      className={editInput}
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-900 mt-1">{extracted.issueDate || '—'}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Vade' : 'Due'}</p>
-                  <p className="text-sm text-gray-900 mt-1">{extracted.dueDate || '—'}</p>
+                  {editing ? (
+                    <input
+                      type="date"
+                      value={extracted.dueDate || ''}
+                      onChange={(e) => updateField('dueDate', e.target.value)}
+                      className={editInput}
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-900 mt-1">{extracted.dueDate || '—'}</p>
+                  )}
                 </div>
               </div>
 
@@ -652,28 +714,51 @@ export default function InvoiceCapturePage() {
 
               {/* Totals */}
               <hr className="border-gray-100" />
-              <div className="space-y-1">
-                {extracted.subtotal != null && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">{lang === 'tr' ? 'Ara Toplam' : 'Subtotal'}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">{lang === 'tr' ? 'Ara Toplam' : 'Subtotal'}</span>
+                  {editing ? (
+                    <input
+                      type="number"
+                      value={extracted.subtotal ?? ''}
+                      onChange={(e) => updateField('subtotal', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                      className="w-32 px-2 py-1 border border-violet-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                  ) : (
                     <span className="text-gray-900">
-                      {extracted.subtotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
+                      {(extracted.subtotal ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
                     </span>
-                  </div>
-                )}
-                {extracted.vatAmount != null && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">KDV</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">KDV</span>
+                  {editing ? (
+                    <input
+                      type="number"
+                      value={extracted.vatAmount ?? ''}
+                      onChange={(e) => updateField('vatAmount', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                      className="w-32 px-2 py-1 border border-violet-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                  ) : (
                     <span className="text-gray-900">
-                      {extracted.vatAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
+                      {(extracted.vatAmount ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
                     </span>
-                  </div>
-                )}
-                <div className="flex justify-between text-base font-bold pt-1">
+                  )}
+                </div>
+                <div className="flex justify-between items-center text-base font-bold pt-1">
                   <span className="text-gray-900">{lang === 'tr' ? 'Genel Toplam' : 'Total'}</span>
-                  <span className="text-violet-600">
-                    {(extracted.totalAmount || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
-                  </span>
+                  {editing ? (
+                    <input
+                      type="number"
+                      value={extracted.totalAmount ?? ''}
+                      onChange={(e) => updateField('totalAmount', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                      className="w-36 px-2 py-1 border border-violet-300 rounded-lg text-base text-right font-bold text-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                  ) : (
+                    <span className="text-violet-600">
+                      {(extracted.totalAmount || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {extracted.currency || 'TL'}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -688,10 +773,24 @@ export default function InvoiceCapturePage() {
             </button>
             <div className="flex gap-3">
               <button
-                onClick={() => router.push('/invoices/new')}
-                className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
+                onClick={() => setEditing((e) => !e)}
+                className={`px-5 py-2.5 rounded-xl border text-sm transition-colors flex items-center gap-2 ${
+                  editing
+                    ? 'border-violet-300 bg-violet-50 text-violet-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
               >
-                {lang === 'tr' ? 'Düzelt' : 'Edit'}
+                {editing ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    {lang === 'tr' ? 'Bitti' : 'Done'}
+                  </>
+                ) : (
+                  <>
+                    <PenLine className="w-4 h-4" />
+                    {lang === 'tr' ? 'Düzelt' : 'Edit'}
+                  </>
+                )}
               </button>
               <button
                 onClick={saveInvoice}

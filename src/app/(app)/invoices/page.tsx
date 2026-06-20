@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import Link from 'next/link';
 import { Receipt, Search, Filter, FileText, AlertTriangle, CheckCircle2, Clock, XCircle, Mail, Download, Plus, Camera } from 'lucide-react';
 import { exportInvoicePDF } from '@/lib/pdf-export';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function InvoicesPage() {
   const lang = useStore((s) => s.settings.language);
@@ -140,10 +141,21 @@ export default function InvoicesPage() {
       </Card>
 
       {/* Invoice list */}
-      {filtered.length === 0 ? (
+      {invoices.length === 0 ? (
+        <EmptyState
+          icon={<Receipt className="w-8 h-8" />}
+          title={lang === 'tr' ? 'Henüz faturanız yok' : 'No invoices yet'}
+          description={lang === 'tr'
+            ? 'İlk faturanızı yakalayın — fotoğrafını çekin ya da yükleyin, AI saniyeler içinde okusun.'
+            : 'Capture your first invoice — take a photo or upload it, and AI reads it in seconds.'}
+          actionLabel={lang === 'tr' ? 'Fatura Yakala' : 'Capture Invoice'}
+          actionHref="/invoices/capture"
+          actionIcon={<Camera className="w-4 h-4" />}
+        />
+      ) : filtered.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <Receipt className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500">{t('common.noResults', lang)}</p>
           </div>
         </Card>

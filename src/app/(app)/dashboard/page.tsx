@@ -6,6 +6,7 @@ import type { Invoice } from '@/lib/types';
 import { t, formatCurrency } from '@/lib/i18n';
 import MetricCard from '@/components/ui/MetricCard';
 import Card from '@/components/ui/Card';
+import EmptyState from '@/components/ui/EmptyState';
 import Link from 'next/link';
 import {
   TrendingUp,
@@ -94,6 +95,7 @@ export default function DashboardPage() {
   const recentInvoices = invoices.slice(0, 5);
   const activeOrders = orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled');
   const { revenueData, cashFlowData } = generateMonthlyData(invoices, lang);
+  const isEmpty = invoices.length === 0 && orders.length === 0;
 
   return (
     <div>
@@ -111,6 +113,22 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {isEmpty && (
+        <EmptyState
+          icon={<Receipt className="w-8 h-8" />}
+          title={lang === 'tr' ? 'Remo\'ya hoş geldiniz! 👋' : 'Welcome to Remo! 👋'}
+          description={lang === 'tr'
+            ? 'İlk faturanızı ekleyin — gelir, gider ve nakit akışınız burada otomatik canlanacak.'
+            : 'Add your first invoice — your revenue, expenses, and cash flow will come alive here automatically.'}
+          actionLabel={lang === 'tr' ? 'İlk Faturanı Yakala' : 'Capture Your First Invoice'}
+          actionHref="/invoices/capture"
+          actionIcon={<Camera className="w-4 h-4" />}
+        />
+      )}
+
+      {!isEmpty && (
+      <>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -308,6 +326,8 @@ export default function DashboardPage() {
           </table>
         </div>
       </Card>
+      </>
+      )}
     </div>
   );
 }
