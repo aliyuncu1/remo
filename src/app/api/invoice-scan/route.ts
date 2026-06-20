@@ -85,6 +85,9 @@ async function scanWithGemini(
   // Gemini accepts both images and PDFs as inline_data.
   const mimeType = mediaType.startsWith('image/') ? mediaType : 'application/pdf';
 
+  let sawRateLimit = false;
+  let lastError = '';
+
   for (const model of GEMINI_VISION_MODELS) {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -113,20 +116,28 @@ async function scanWithGemini(
 
     const err = await res.json().catch(() => ({}));
     const msg = err.error?.message || '';
+    lastError = msg;
+    console.error(`[invoice-scan] Gemini ${model} failed:`, res.status, msg);
+
+    // Each model has its own free-tier quota — on quota/rate limits, try the next model.
+    if (msg.includes('quota') || msg.includes('rate') || res.status === 429) {
+      sawRateLimit = true;
+      continue;
+    }
 
     // Model unavailable on this key — try the next one.
     if (msg.includes('not found') || msg.includes('not supported')) continue;
 
-    if (msg.includes('quota') || msg.includes('rate')) {
-      throw new Error(
-        'Gemini rate limit reached. Wait 30-60 seconds and try again. (Free tier: 15 requests/minute)'
-      );
-    }
-
     throw new Error(msg || `Gemini API error: ${res.status}`);
   }
 
-  throw new Error('No available Gemini model found. Check your API key at https://aistudio.google.com/apikey');
+  if (sawRateLimit) {
+    throw new Error(
+      'Gemini rate limit reached. Wait 30-60 seconds and try again. (Free tier: 15 requests/minute)'
+    );
+  }
+
+  throw new Error(lastError || 'No available Gemini model found. Check your API key at https://aistudio.google.com/apikey');
 }
 
 async function scanWithAnthropic(
