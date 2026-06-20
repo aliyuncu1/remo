@@ -176,11 +176,11 @@ export default function SettingsPage() {
               <MessageCircle className="w-5 h-5 text-green-600 shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-green-900">
-                  {lang === 'tr' ? 'WhatsApp ile Fatura Gonder' : 'Send Invoices via WhatsApp'}
+                  {lang === 'tr' ? 'WhatsApp ile Fatura Gönder' : 'Send Invoices via WhatsApp'}
                 </p>
                 <p className="text-xs text-green-700 mt-0.5">
                   {lang === 'tr'
-                    ? 'Fatura PDF veya fotografini WhatsApp uzerinden gonderin, AI otomatik olarak okusun.'
+                    ? 'Fatura PDF veya fotoğrafını WhatsApp üzerinden gönderin, AI otomatik olarak okusun.'
                     : 'Send invoice PDFs or photos via WhatsApp, AI reads them automatically.'}
                 </p>
               </div>
@@ -191,13 +191,13 @@ export default function SettingsPage() {
                 <Smartphone className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {lang === 'tr' ? 'Nasil Calisir?' : 'How It Works'}
+                    {lang === 'tr' ? 'Nasıl Çalışır?' : 'How It Works'}
                   </p>
                   <ol className="text-xs text-gray-600 mt-1.5 space-y-1 list-decimal list-inside">
-                    <li>{lang === 'tr' ? 'Remo WhatsApp numarasini rehberinize ekleyin' : 'Add Remo WhatsApp number to your contacts'}</li>
-                    <li>{lang === 'tr' ? 'Fatura PDF veya fotografini gonderin' : 'Send an invoice PDF or photo'}</li>
-                    <li>{lang === 'tr' ? 'AI fatura bilgilerini otomatik cikarir' : 'AI automatically extracts invoice data'}</li>
-                    <li>{lang === 'tr' ? 'Onayla veya duzelt — bitti!' : 'Confirm or edit — done!'}</li>
+                    <li>{lang === 'tr' ? 'Remo WhatsApp numarasını rehberinize ekleyin' : 'Add Remo WhatsApp number to your contacts'}</li>
+                    <li>{lang === 'tr' ? 'Fatura PDF veya fotoğrafını gönderin' : 'Send an invoice PDF or photo'}</li>
+                    <li>{lang === 'tr' ? 'AI fatura bilgilerini otomatik çıkarır' : 'AI automatically extracts invoice data'}</li>
+                    <li>{lang === 'tr' ? 'Onayla veya düzelt — bitti!' : 'Confirm or edit — done!'}</li>
                   </ol>
                 </div>
               </div>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
               <ShieldCheck className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
               <p className="text-xs text-gray-400">
                 {lang === 'tr'
-                  ? 'Dosyalariniz sifrelenmis kanallar uzerinden iletilir. Sadece fatura isleme icin kullanilir.'
+                  ? 'Dosyalarınız şifrelenmiş kanallar üzerinden iletilir. Sadece fatura işleme için kullanılır.'
                   : 'Your files are transmitted over encrypted channels. Used only for invoice processing.'}
               </p>
             </div>
@@ -247,7 +247,7 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'tr' ? 'Sağlayıcı' : 'Provider'}</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {([
                   { value: 'anthropic' as const, label: 'Claude Sonnet', note: lang === 'tr' ? 'Önerilen' : 'Recommended' },
                   { value: 'openai' as const, label: 'OpenAI GPT-4o', note: lang === 'tr' ? 'Alternatif' : 'Alternative' },

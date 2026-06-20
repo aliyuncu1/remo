@@ -53,11 +53,11 @@ export default function OnboardingWizard() {
               <div className="text-center mb-8">
                 <Logo size="text-4xl" className="mb-5 animate-float" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {lang === 'tr' ? 'Remo\'ya Hos Geldiniz!' : 'Welcome to Remo!'}
+                  {lang === 'tr' ? 'Remo\'ya Hoş Geldiniz!' : 'Welcome to Remo!'}
                 </h2>
                 <p className="text-sm text-gray-500">
                   {lang === 'tr'
-                    ? 'AI destekli fatura asistaniniz. Hadi baslayalim.'
+                    ? 'AI destekli fatura asistanınız. Hadi başlayalım.'
                     : 'Your AI-powered invoice assistant. Let\'s get started.'}
                 </p>
               </div>
@@ -91,17 +91,17 @@ export default function OnboardingWizard() {
               {/* Company name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {lang === 'tr' ? 'Firma Adiniz' : 'Company Name'}
+                  {lang === 'tr' ? 'Firma Adınız' : 'Company Name'}
                 </label>
                 <input
                   type="text"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder={lang === 'tr' ? 'ornegin: Yilmaz Tekstil' : 'e.g. Yilmaz Textiles'}
+                  placeholder={lang === 'tr' ? 'örneğin: Yılmaz Tekstil' : 'e.g. Yilmaz Textiles'}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-400 mt-1.5">
-                  {lang === 'tr' ? 'Daha sonra ayarlardan degistirebilirsiniz.' : 'You can change this later in settings.'}
+                  {lang === 'tr' ? 'Daha sonra ayarlardan değiştirebilirsiniz.' : 'You can change this later in settings.'}
                 </p>
               </div>
             </div>
@@ -112,19 +112,19 @@ export default function OnboardingWizard() {
             <div>
               <div className="text-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  {lang === 'tr' ? 'Nasil Calisir?' : 'How It Works'}
+                  {lang === 'tr' ? 'Nasıl Çalışır?' : 'How It Works'}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {lang === 'tr' ? 'Faturanizi istediginiz yontemle gonderin.' : 'Send your invoice however you want.'}
+                  {lang === 'tr' ? 'Faturanızı istediğiniz yöntemle gönderin.' : 'Send your invoice however you want.'}
                 </p>
               </div>
 
               {/* Methods preview */}
               <div className="space-y-3 mb-6">
                 {[
-                  { icon: <Camera className="w-4 h-4" />, label: lang === 'tr' ? 'Fotograf cekin' : 'Take a photo', color: 'bg-blue-50 text-blue-600' },
-                  { icon: <FileText className="w-4 h-4" />, label: lang === 'tr' ? 'PDF veya resim yukleyin' : 'Upload PDF or image', color: 'bg-violet-50 text-violet-600' },
-                  { icon: <MessageCircle className="w-4 h-4" />, label: lang === 'tr' ? 'WhatsApp ile gonderin' : 'Send via WhatsApp', color: 'bg-green-50 text-green-600' },
+                  { icon: <Camera className="w-4 h-4" />, label: lang === 'tr' ? 'Fotoğraf çekin' : 'Take a photo', color: 'bg-blue-50 text-blue-600' },
+                  { icon: <FileText className="w-4 h-4" />, label: lang === 'tr' ? 'PDF veya resim yükleyin' : 'Upload PDF or image', color: 'bg-violet-50 text-violet-600' },
+                  { icon: <MessageCircle className="w-4 h-4" />, label: lang === 'tr' ? 'WhatsApp ile gönderin' : 'Send via WhatsApp', color: 'bg-green-50 text-green-600' },
                 ].map((m) => (
                   <div key={m.label} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
                     <div className={`w-8 h-8 rounded-lg ${m.color} flex items-center justify-center shrink-0`}>
@@ -147,10 +147,10 @@ export default function OnboardingWizard() {
                     <Database className="w-5 h-5 shrink-0" />
                     <div>
                       <p className="font-medium text-sm">
-                        {lang === 'tr' ? 'Demo verileriyle kesfet' : 'Explore with demo data'}
+                        {lang === 'tr' ? 'Demo verileriyle keşfet' : 'Explore with demo data'}
                       </p>
                       <p className="text-xs text-violet-200 mt-0.5">
-                        {lang === 'tr' ? 'Ornek faturalar ve musterilerle platformu gorun' : 'See the platform with sample invoices and customers'}
+                        {lang === 'tr' ? 'Örnek faturalar ve müşterilerle platformu görün' : 'See the platform with sample invoices and customers'}
                       </p>
                     </div>
                   </div>
@@ -164,10 +164,10 @@ export default function OnboardingWizard() {
                     <ArrowRight className="w-5 h-5 text-gray-400 shrink-0" />
                     <div>
                       <p className="font-medium text-sm text-gray-900">
-                        {lang === 'tr' ? 'Bos baslat' : 'Start empty'}
+                        {lang === 'tr' ? 'Boş başlat' : 'Start empty'}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {lang === 'tr' ? 'Kendi faturalarinizla baslayın' : 'Start with your own invoices'}
+                        {lang === 'tr' ? 'Kendi faturalarınızla başlayın' : 'Start with your own invoices'}
                       </p>
                     </div>
                   </div>

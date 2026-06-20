@@ -98,7 +98,7 @@ export default function InvoiceCapturePage() {
         videoRef.current.srcObject = stream;
       }
     } catch {
-      setError(lang === 'tr' ? 'Kameraya erisim saglanamadi.' : 'Could not access camera.');
+      setError(lang === 'tr' ? 'Kameraya erişim sağlanamadı.' : 'Could not access camera.');
       setStep('error');
     }
   };
@@ -130,7 +130,7 @@ export default function InvoiceCapturePage() {
   // Handle file selection
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
-      setError(lang === 'tr' ? 'Sadece resim ve PDF dosyalari desteklenir.' : 'Only image and PDF files are supported.');
+      setError(lang === 'tr' ? 'Sadece resim ve PDF dosyaları desteklenir.' : 'Only image and PDF files are supported.');
       setStep('error');
       return;
     }
@@ -203,7 +203,7 @@ export default function InvoiceCapturePage() {
       }
 
       if (!data.result) {
-        setError(lang === 'tr' ? 'Bu dosyadan fatura bilgisi cikaramadik.' : 'Could not extract invoice data from this file.');
+        setError(lang === 'tr' ? 'Bu dosyadan fatura bilgisi çıkaramadık.' : 'Could not extract invoice data from this file.');
         setStep('error');
         return;
       }
@@ -274,7 +274,7 @@ export default function InvoiceCapturePage() {
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           {lang === 'tr'
-            ? 'Faturanizi istediginiz yontemle gonderin — AI gerisini halletsin.'
+            ? 'Faturanızı istediğiniz yöntemle gönderin — AI gerisini halletsin.'
             : 'Send your invoice however you want — AI handles the rest.'}
         </p>
       </div>
@@ -308,17 +308,17 @@ export default function InvoiceCapturePage() {
               <Upload className="w-8 h-8 text-violet-600" />
             </div>
             <p className="text-lg font-semibold text-gray-900 mb-1">
-              {lang === 'tr' ? 'Fatura Surukle & Birak' : 'Drag & Drop Invoice'}
+              {lang === 'tr' ? 'Faturayı Sürükle & Bırak' : 'Drag & Drop Invoice'}
             </p>
             <p className="text-sm text-gray-500">
               {lang === 'tr'
-                ? 'veya dosya secmek icin tiklayin (PDF, JPG, PNG)'
+                ? 'veya dosya seçmek için tıklayın (PDF, JPG, PNG)'
                 : 'or click to select a file (PDF, JPG, PNG)'}
             </p>
             {dragOver && (
               <div className="absolute inset-0 bg-violet-500/10 rounded-2xl flex items-center justify-center">
                 <p className="text-violet-700 font-semibold text-lg">
-                  {lang === 'tr' ? 'Birakin!' : 'Drop it!'}
+                  {lang === 'tr' ? 'Bırakın!' : 'Drop it!'}
                 </p>
               </div>
             )}
@@ -336,11 +336,11 @@ export default function InvoiceCapturePage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
-                  {lang === 'tr' ? 'Kamera ile Cek' : 'Take Photo'}
+                  {lang === 'tr' ? 'Kamera ile Çek' : 'Take Photo'}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {lang === 'tr'
-                    ? 'Kagit faturayi telefonunuzla cekin'
+                    ? 'Kâğıt faturayı telefonunuzla çekin'
                     : 'Snap a paper invoice with your phone'}
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default function InvoiceCapturePage() {
               onClick={() => {
                 // Show WhatsApp instructions modal or redirect
                 const whatsappNumber = '905XXXXXXXXX'; // TODO: Replace with actual number
-                window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Merhaba, fatura gondermek istiyorum.')}`, '_blank');
+                window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Merhaba, fatura göndermek istiyorum.')}`, '_blank');
               }}
               className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-violet-300 hover:shadow-md transition-all text-left group"
             >
@@ -380,11 +380,11 @@ export default function InvoiceCapturePage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
-                  {lang === 'tr' ? 'WhatsApp\'tan Gonder' : 'Send via WhatsApp'}
+                  {lang === 'tr' ? 'WhatsApp\'tan Gönder' : 'Send via WhatsApp'}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {lang === 'tr'
-                    ? 'Fatura PDF/fotografini WhatsApp ile gonderin'
+                    ? 'Fatura PDF/fotoğrafını WhatsApp ile gönderin'
                     : 'Send invoice PDF/photo via WhatsApp'}
                 </p>
               </div>
@@ -424,7 +424,7 @@ export default function InvoiceCapturePage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
-                  {lang === 'tr' ? 'Manuel Giris' : 'Manual Entry'}
+                  {lang === 'tr' ? 'Manuel Giriş' : 'Manual Entry'}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {lang === 'tr'
@@ -441,15 +441,15 @@ export default function InvoiceCapturePage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
-                  {lang === 'tr' ? 'Paylasim ile Gonder' : 'Share to Remo'}
+                  {lang === 'tr' ? 'Paylaşım ile Gönder' : 'Share to Remo'}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {lang === 'tr'
-                    ? 'Herhangi bir uygulamadan Paylas > Remo'
+                    ? 'Herhangi bir uygulamadan Paylaş > Remo'
                     : 'From any app: Share > Remo'}
                 </p>
                 <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium mt-1.5">
-                  {lang === 'tr' ? 'Yakinda' : 'Coming soon'}
+                  {lang === 'tr' ? 'Yakında' : 'Coming soon'}
                 </span>
               </div>
             </div>
@@ -460,7 +460,7 @@ export default function InvoiceCapturePage() {
             <Sparkles className="w-3.5 h-3.5" />
             <span>
               {lang === 'tr'
-                ? 'Tum yontemler AI destekli — fatura otomatik okunur ve kaydedilir'
+                ? 'Tüm yöntemler AI destekli — fatura otomatik okunur ve kaydedilir'
                 : 'All methods are AI-powered — invoices are automatically read and saved'}
             </span>
           </div>
@@ -482,7 +482,7 @@ export default function InvoiceCapturePage() {
               <div className="absolute inset-8 border-2 border-white/30 rounded-xl" />
               <div className="absolute bottom-4 left-0 right-0 text-center">
                 <p className="text-white/70 text-sm">
-                  {lang === 'tr' ? 'Faturayi cerceve icine alin' : 'Align invoice within the frame'}
+                  {lang === 'tr' ? 'Faturayı çerçeve içine alın' : 'Align invoice within the frame'}
                 </p>
               </div>
             </div>
@@ -494,14 +494,14 @@ export default function InvoiceCapturePage() {
               onClick={reset}
               className="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              {lang === 'tr' ? 'Iptal' : 'Cancel'}
+              {lang === 'tr' ? 'İptal' : 'Cancel'}
             </button>
             <button
               onClick={capturePhoto}
               className="px-8 py-3 rounded-xl remo-gradient text-white font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
             >
               <Camera className="w-5 h-5" />
-              {lang === 'tr' ? 'Cek' : 'Capture'}
+              {lang === 'tr' ? 'Çek' : 'Capture'}
             </button>
           </div>
         </div>
@@ -542,7 +542,7 @@ export default function InvoiceCapturePage() {
                 onClick={reset}
                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
               >
-                {lang === 'tr' ? 'Tekrar Cek' : 'Retake'}
+                {lang === 'tr' ? 'Tekrar Çek' : 'Retake'}
               </button>
               <button
                 onClick={processWithAI}
@@ -568,7 +568,7 @@ export default function InvoiceCapturePage() {
           </h2>
           <p className="text-sm text-gray-500">
             {lang === 'tr'
-              ? 'AI fatura icerigini analiz ediyor. Bu birkaç saniye surebilir.'
+              ? 'AI fatura içeriğini analiz ediyor. Bu birkaç saniye sürebilir.'
               : 'AI is analyzing the invoice content. This may take a few seconds.'}
           </p>
           <Loader2 className="w-6 h-6 text-violet-600 animate-spin mx-auto mt-6" />
@@ -581,7 +581,7 @@ export default function InvoiceCapturePage() {
           <div className="flex items-center gap-3 mb-6">
             <CheckCircle2 className="w-6 h-6 text-emerald-600" />
             <h2 className="text-lg font-bold text-gray-900">
-              {lang === 'tr' ? 'Fatura Basariyla Okundu!' : 'Invoice Read Successfully!'}
+              {lang === 'tr' ? 'Fatura Başarıyla Okundu!' : 'Invoice Read Successfully!'}
             </h2>
           </div>
 
@@ -606,11 +606,11 @@ export default function InvoiceCapturePage() {
               {/* Parties */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Gonderen' : 'From'}</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Gönderen' : 'From'}</p>
                   <p className="text-sm font-medium text-gray-900 mt-1">{extracted.fromCompany || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Alici' : 'To'}</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Alıcı' : 'To'}</p>
                   <p className="text-sm font-medium text-gray-900 mt-1">{extracted.toCompany || '—'}</p>
                 </div>
               </div>
@@ -684,14 +684,14 @@ export default function InvoiceCapturePage() {
               onClick={reset}
               className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
             >
-              {lang === 'tr' ? 'Baska Fatura' : 'Another Invoice'}
+              {lang === 'tr' ? 'Başka Fatura' : 'Another Invoice'}
             </button>
             <div className="flex gap-3">
               <button
                 onClick={() => router.push('/invoices/new')}
                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
               >
-                {lang === 'tr' ? 'Duzelt' : 'Edit'}
+                {lang === 'tr' ? 'Düzelt' : 'Edit'}
               </button>
               <button
                 onClick={saveInvoice}
