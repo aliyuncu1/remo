@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
+import WaitlistForm from '@/components/WaitlistForm';
 import {
   Camera,
   MessageCircle,
@@ -283,18 +284,21 @@ export default function LandingPage() {
       <section className="py-24 px-6 remo-gradient">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
-            Faturalarla uğraşmayı bırakın
+            Erken erişim listesine katılın
           </h2>
           <p className="text-violet-200 mb-10 text-lg">
-            İlk 10 faturanız ücretsiz. Kredi kartı gerekmez.
+            Remo&apos;yu ilk kullananlardan olun. İlk 10 faturanız ücretsiz, kredi kartı gerekmez.
           </p>
-          <Link
-            href="/dashboard"
-            className="group inline-flex items-center gap-2 bg-white text-violet-700 px-8 py-4 rounded-xl font-semibold hover:bg-violet-50 transition-colors shadow-lg text-lg"
-          >
-            Hemen Başlayın
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          <WaitlistForm />
+          <div className="mt-8">
+            <Link
+              href="/dashboard"
+              className="group inline-flex items-center gap-2 text-white/90 hover:text-white font-medium transition-colors"
+            >
+              Önce demoyu denemek ister misiniz?
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 
