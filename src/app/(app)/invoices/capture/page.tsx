@@ -24,6 +24,37 @@ import {
 
 type CaptureStep = 'choose' | 'camera' | 'preview' | 'processing' | 'result' | 'error';
 
+// Map raw technical/API errors to friendly, customer-safe messages.
+// Never surface things like "credit balance too low" to an end user.
+function friendlyError(raw: string, lang: 'tr' | 'en'): string {
+  const m = raw.toLowerCase();
+  const isService =
+    m.includes('credit') || m.includes('balance') || m.includes('billing') ||
+    m.includes('quota') || m.includes('not configured') || m.includes('api key') ||
+    m.includes('500') || m.includes('unauthorized') || m.includes('401');
+  const isRate = m.includes('rate') || m.includes('429') || m.includes('too many');
+  const isNetwork = m.includes('failed to fetch') || m.includes('network') || m.includes('load failed');
+
+  if (isRate) {
+    return lang === 'tr'
+      ? 'Şu anda çok yoğunuz. Lütfen birkaç dakika sonra tekrar deneyin.'
+      : 'We are very busy right now. Please try again in a few minutes.';
+  }
+  if (isNetwork) {
+    return lang === 'tr'
+      ? 'Bağlantı hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.'
+      : 'Connection error. Please check your internet and try again.';
+  }
+  if (isService) {
+    return lang === 'tr'
+      ? 'AI servisi şu anda kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.'
+      : 'The AI service is temporarily unavailable. Please try again in a few minutes.';
+  }
+  return lang === 'tr'
+    ? 'Fatura işlenirken bir sorun oluştu. Lütfen tekrar deneyin.'
+    : 'Something went wrong while processing the invoice. Please try again.';
+}
+
 interface ExtractedInvoice {
   invoiceNumber?: string;
   fromCompany?: string;
@@ -180,7 +211,9 @@ export default function InvoiceCapturePage() {
       setExtracted(data.result);
       setStep('result');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const raw = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[invoice-scan] error:', raw);
+      setError(friendlyError(raw, lang));
       setStep('error');
     }
   };
