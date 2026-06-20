@@ -41,13 +41,15 @@ Sadece JSON dondur, baska bir sey yazma.`;
 
     let resultText: string;
 
-    if (provider === 'anthropic') {
+    if (provider === 'gemini') {
+      resultText = await scanWithGemini(base64, mediaType, prompt, apiKey);
+    } else if (provider === 'anthropic') {
       resultText = await scanWithAnthropic(base64, mediaType, prompt, apiKey);
     } else if (provider === 'openai') {
       resultText = await scanWithOpenAI(base64, mediaType, prompt, apiKey);
     } else {
       return NextResponse.json(
-        { error: 'Vision scanning is only supported with Anthropic or OpenAI.' },
+        { error: 'Vision scanning is only supported with Gemini, Anthropic, or OpenAI.' },
         { status: 400 }
       );
     }
@@ -65,6 +67,66 @@ Sadece JSON dondur, baska bir sey yazma.`;
     console.error('[invoice-scan] Error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+// Free-tier Gemini models, tried in order (cheapest/fastest first).
+const GEMINI_VISION_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash-latest',
+];
+
+async function scanWithGemini(
+  base64: string,
+  mediaType: string,
+  prompt: string,
+  apiKey: string
+): Promise<string> {
+  // Gemini accepts both images and PDFs as inline_data.
+  const mimeType = mediaType.startsWith('image/') ? mediaType : 'application/pdf';
+
+  for (const model of GEMINI_VISION_MODELS) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { inline_data: { mime_type: mimeType, data: base64 } },
+                { text: prompt },
+              ],
+            },
+          ],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 2048 },
+        }),
+      }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    }
+
+    const err = await res.json().catch(() => ({}));
+    const msg = err.error?.message || '';
+
+    // Model unavailable on this key — try the next one.
+    if (msg.includes('not found') || msg.includes('not supported')) continue;
+
+    if (msg.includes('quota') || msg.includes('rate')) {
+      throw new Error(
+        'Gemini rate limit reached. Wait 30-60 seconds and try again. (Free tier: 15 requests/minute)'
+      );
+    }
+
+    throw new Error(msg || `Gemini API error: ${res.status}`);
+  }
+
+  throw new Error('No available Gemini model found. Check your API key at https://aistudio.google.com/apikey');
 }
 
 async function scanWithAnthropic(
