@@ -41,7 +41,9 @@ Sadece JSON dondur, baska bir sey yazma.`;
 
     let resultText: string;
 
-    if (provider === 'gemini') {
+    if (provider === 'groq') {
+      resultText = await scanWithGroq(base64, mediaType, prompt, apiKey);
+    } else if (provider === 'gemini') {
       resultText = await scanWithGemini(base64, mediaType, prompt, apiKey);
     } else if (provider === 'anthropic') {
       resultText = await scanWithAnthropic(base64, mediaType, prompt, apiKey);
@@ -49,7 +51,7 @@ Sadece JSON dondur, baska bir sey yazma.`;
       resultText = await scanWithOpenAI(base64, mediaType, prompt, apiKey);
     } else {
       return NextResponse.json(
-        { error: 'Vision scanning is only supported with Gemini, Anthropic, or OpenAI.' },
+        { error: 'Vision scanning is only supported with Groq, Gemini, Anthropic, or OpenAI.' },
         { status: 400 }
       );
     }
@@ -67,6 +69,74 @@ Sadece JSON dondur, baska bir sey yazma.`;
     console.error('[invoice-scan] Error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+// Free Groq vision models, tried in order. Works in regions where Gemini's
+// free tier is unavailable (e.g. Turkey). Groq is OpenAI-API-compatible.
+const GROQ_VISION_MODELS = [
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'meta-llama/llama-4-maverick-17b-128e-instruct',
+];
+
+async function scanWithGroq(
+  base64: string,
+  mediaType: string,
+  prompt: string,
+  apiKey: string
+): Promise<string> {
+  // Groq vision accepts images only (not PDFs) via OpenAI-style image_url.
+  if (!mediaType.startsWith('image/')) {
+    throw new Error(
+      'PDF scanning is not supported on the free tier. Please upload a photo or image of the invoice.'
+    );
+  }
+
+  let lastError = '';
+  for (const model of GROQ_VISION_MODELS) {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mediaType};base64,${base64}` } },
+            ],
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) return text;
+    }
+
+    const err = await res.json().catch(() => ({}));
+    const msg = err.error?.message || '';
+    lastError = msg;
+    console.error(`[invoice-scan] Groq ${model} failed:`, res.status, msg);
+
+    // Model retired/unavailable — try the next one.
+    if (res.status === 404 || msg.includes('decommissioned') || msg.includes('does not exist')) continue;
+
+    if (res.status === 429 || msg.includes('rate')) {
+      throw new Error('Groq rate limit reached. Wait a few seconds and try again.');
+    }
+
+    throw new Error(msg || `Groq API error: ${res.status}`);
+  }
+
+  throw new Error(lastError || 'No available Groq vision model found.');
 }
 
 // Free-tier Gemini models, tried in order (cheapest/fastest first).
