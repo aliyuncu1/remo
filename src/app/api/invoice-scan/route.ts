@@ -41,7 +41,9 @@ Sadece JSON dondur, baska bir sey yazma.`;
 
     let resultText: string;
 
-    if (provider === 'groq') {
+    if (provider === 'github') {
+      resultText = await scanWithGithub(base64, mediaType, prompt, apiKey);
+    } else if (provider === 'groq') {
       resultText = await scanWithGroq(base64, mediaType, prompt, apiKey);
     } else if (provider === 'gemini') {
       resultText = await scanWithGemini(base64, mediaType, prompt, apiKey);
@@ -51,7 +53,7 @@ Sadece JSON dondur, baska bir sey yazma.`;
       resultText = await scanWithOpenAI(base64, mediaType, prompt, apiKey);
     } else {
       return NextResponse.json(
-        { error: 'Vision scanning is only supported with Groq, Gemini, Anthropic, or OpenAI.' },
+        { error: 'Vision scanning is only supported with GitHub, Groq, Gemini, Anthropic, or OpenAI.' },
         { status: 400 }
       );
     }
@@ -69,6 +71,70 @@ Sadece JSON dondur, baska bir sey yazma.`;
     console.error('[invoice-scan] Error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+// GitHub Models — free vision access (GPT-4o) using a GitHub token.
+// Works in Turkey, no separate account needed. OpenAI-API-compatible.
+const GITHUB_VISION_MODELS = ['openai/gpt-4o', 'openai/gpt-4o-mini'];
+
+async function scanWithGithub(
+  base64: string,
+  mediaType: string,
+  prompt: string,
+  apiKey: string
+): Promise<string> {
+  if (!mediaType.startsWith('image/')) {
+    throw new Error(
+      'PDF scanning is not supported on the free tier. Please upload a photo or image of the invoice.'
+    );
+  }
+
+  let lastError = '';
+  for (const model of GITHUB_VISION_MODELS) {
+    const res = await fetch('https://models.github.ai/inference/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mediaType};base64,${base64}` } },
+            ],
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) return text;
+    }
+
+    const err = await res.json().catch(() => ({}));
+    const msg = err.error?.message || err.message || '';
+    lastError = msg;
+    console.error(`[invoice-scan] GitHub Models ${model} failed:`, res.status, msg);
+
+    // Model unavailable — try the next one.
+    if (res.status === 404 || msg.includes('unknown_model') || msg.includes('not found')) continue;
+
+    if (res.status === 429 || msg.toLowerCase().includes('rate')) {
+      throw new Error('GitHub Models rate limit reached. Wait a minute and try again.');
+    }
+
+    throw new Error(msg || `GitHub Models API error: ${res.status}`);
+  }
+
+  throw new Error(lastError || 'No available GitHub Models vision model found.');
 }
 
 // Free Groq vision models, tried in order. Works in regions where Gemini's
