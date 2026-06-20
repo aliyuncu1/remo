@@ -19,8 +19,8 @@ export default function ReportsPage() {
 
   const outgoing = invoices.filter((i) => i.direction === 'outgoing');
   const incoming = invoices.filter((i) => i.direction === 'incoming');
-  const totalRevenue = outgoing.filter((i) => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0);
-  const totalExpenses = incoming.filter((i) => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0);
+  const totalRevenue = outgoing.reduce((s, i) => s + i.totalAmount, 0);
+  const totalExpenses = incoming.reduce((s, i) => s + i.totalAmount, 0);
   const netProfit = totalRevenue - totalExpenses;
 
   // Invoice status distribution

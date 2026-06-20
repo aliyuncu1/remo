@@ -80,8 +80,10 @@ export default function DashboardPage() {
   const outgoing = invoices.filter((i) => i.direction === 'outgoing');
   const incoming = invoices.filter((i) => i.direction === 'incoming');
   const stats = {
-    totalRevenue: outgoing.filter((i) => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0),
-    totalExpenses: incoming.filter((i) => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0),
+    // Count all invoices (not just paid) so the cards match the charts below
+    // and update immediately when a new invoice is captured.
+    totalRevenue: outgoing.reduce((s, i) => s + i.totalAmount, 0),
+    totalExpenses: incoming.reduce((s, i) => s + i.totalAmount, 0),
     outstandingReceivables: outgoing.filter((i) => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + i.totalAmount, 0),
     outstandingPayables: incoming.filter((i) => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + i.totalAmount, 0),
     overdueInvoices: invoices.filter((i) => i.status === 'overdue').length,
