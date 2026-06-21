@@ -22,11 +22,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file data provided.' }, { status: 400 });
     }
 
-    const prompt = `Bu bir Turk faturasi. Asagidaki bilgileri JSON olarak cikar. Eger fatura degilse null dondur.
+    const prompt = `Sen bir Türk fatura okuma uzmanısın. Bu görsel HER TÜR fatura/fiş olabilir:
+ticari fatura, e-Fatura, e-Arşiv, elektrik/su/doğalgaz/telefon/internet faturası,
+market fişi, serbest meslek makbuzu, kira veya hizmet faturası.
+
+Görselden aşağıdaki bilgileri çıkar ve SADECE geçerli JSON döndür.
+Eğer görsel bir fatura/fiş DEĞİLSE tam olarak null döndür.
+
 {
-  "invoiceNumber": "fatura numarasi",
-  "fromCompany": "gonderen firma adi",
-  "toCompany": "alici firma adi",
+  "invoiceNumber": "fatura/belge/fiş numarası",
+  "fromCompany": "satıcı / faturayı kesen firma (fatura/abonelik faturalarında hizmeti veren şirket, ör. elektrik şirketi)",
+  "toCompany": "alıcı / müşteri / abone adı",
   "totalAmount": 12345.67,
   "currency": "TRY",
   "vatAmount": 1234.56,
@@ -34,10 +40,20 @@ export async function POST(req: NextRequest) {
   "issueDate": "2026-01-15",
   "dueDate": "2026-02-15",
   "items": [
-    { "description": "kalem aciklamasi", "quantity": 1, "unitPrice": 100, "vatRate": 20, "total": 120 }
+    { "description": "kalem açıklaması", "quantity": 1, "unitPrice": 100, "vatRate": 20, "total": 120 }
   ]
 }
-Sadece JSON dondur, baska bir sey yazma.`;
+
+ÖNEMLİ KURALLAR:
+- Tarihleri DAİMA YYYY-AA-GG formatına çevir (ör. "15.01.2026" → "2026-01-15", "15/01/26" → "2026-01-15").
+- Türk sayı formatını doğru oku: "1.234,56" = 1234.56 (nokta binlik, virgül ondalık). Para birimi sembollerini (₺, TL) kaldır.
+- Bir alan faturada YOKSA o alana null koy. ASLA uydurma/tahmin etme.
+- Fatura kalemli değilse (ör. elektrik faturası genelde tek tutardır) "items" boş dizi [] olabilir.
+- vadeYoksa dueDate null olsun. totalAmount en güvenilir okuduğun GENEL/ÖDENECEK toplam olsun.
+- KDV birden fazla orandaysa toplam KDV tutarını ver.
+- Para birimi TL değilse doğru kodu yaz (USD, EUR, GBP).
+
+Sadece JSON döndür, başka hiçbir şey yazma.`;
 
     let resultText: string;
 
