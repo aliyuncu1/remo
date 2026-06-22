@@ -18,7 +18,13 @@ export async function analyzeDocument(
   const res = await fetch('/api/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, provider: options.apiProvider, apiKey: options.apiKey }),
+    // Only send a client key/provider if the user explicitly set one;
+    // otherwise the server falls back to its own AI_API_KEY / AI_PROVIDER.
+    body: JSON.stringify(
+      options.apiKey
+        ? { prompt, provider: options.apiProvider, apiKey: options.apiKey }
+        : { prompt }
+    ),
   });
 
   if (!res.ok) {

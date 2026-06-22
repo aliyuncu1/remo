@@ -5,16 +5,22 @@ import { useStore } from '@/lib/store';
 import { t, formatCurrency } from '@/lib/i18n';
 import Card from '@/components/ui/Card';
 import Link from 'next/link';
-import { Receipt, Search, Filter, FileText, AlertTriangle, CheckCircle2, Clock, XCircle, Mail, Download, Plus, Camera } from 'lucide-react';
+import { Receipt, Search, Filter, FileText, AlertTriangle, CheckCircle2, Clock, XCircle, Mail, Download, Plus, Camera, X } from 'lucide-react';
 import { exportInvoicePDF } from '@/lib/pdf-export';
 import EmptyState from '@/components/ui/EmptyState';
+import type { Invoice } from '@/lib/types';
 
 export default function InvoicesPage() {
   const lang = useStore((s) => s.settings.language);
   const invoices = useStore((s) => s.invoices);
+  const updateInvoiceStatus = useStore((s) => s.updateInvoiceStatus);
   const [search, setSearch] = useState('');
   const [filterDir, setFilterDir] = useState<'all' | 'incoming' | 'outgoing'>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Look up live so status changes reflect immediately in the modal.
+  const selected = invoices.find((i) => i.id === selectedId) || null;
 
   const filtered = invoices.filter((inv) => {
     const matchSearch = !search ||
@@ -168,7 +174,8 @@ export default function InvoicesPage() {
             return (
               <div
                 key={inv.id}
-                className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all ${
+                onClick={() => setSelectedId(inv.id)}
+                className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer ${
                   isOverdue ? 'border-red-200 bg-red-50/30' : 'border-gray-100'
                 }`}
               >
@@ -208,7 +215,7 @@ export default function InvoicesPage() {
                     </span>
                   </div>
                   <button
-                    onClick={() => { exportInvoicePDF(inv, lang).catch((e) => console.error('PDF export failed', e)); }}
+                    onClick={(e) => { e.stopPropagation(); exportInvoicePDF(inv, lang).catch((err) => console.error('PDF export failed', err)); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-violet-600 hover:bg-violet-50 transition-colors"
                     title={lang === 'tr' ? 'PDF İndir' : 'Download PDF'}
                   >
@@ -219,6 +226,120 @@ export default function InvoicesPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Detail + status modal */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 bg-gray-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setSelectedId(null)}
+        >
+          <div
+            className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between p-5 border-b border-gray-100">
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-900 truncate">
+                  {selected.direction === 'incoming' ? selected.fromCompany : selected.toCompany}
+                </h3>
+                <p className="text-xs text-gray-500 font-mono mt-0.5">{selected.invoiceNumber}</p>
+              </div>
+              <button onClick={() => setSelectedId(null)} className="text-gray-400 hover:text-gray-600 shrink-0">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-5">
+              {/* Status selector */}
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">{lang === 'tr' ? 'Durum' : 'Status'}</p>
+                <div className="flex flex-wrap gap-2">
+                  {(['draft', 'sent', 'paid', 'overdue', 'cancelled'] as const).map((s) => {
+                    const SIcon = statusIcons[s];
+                    const active = selected.status === s;
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => updateInvoiceStatus(selected.id, s)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          active ? `${statusColors[s]} ring-2 ring-offset-1 ring-violet-400` : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                        }`}
+                      >
+                        <SIcon className="w-3.5 h-3.5" />
+                        {statusLabels[s]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Meta grid */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Yön' : 'Direction'}</p>
+                  <p className="text-gray-900 mt-1">{selected.direction === 'incoming' ? (lang === 'tr' ? 'Gelen' : 'Incoming') : (lang === 'tr' ? 'Giden' : 'Outgoing')}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Tür' : 'Type'}</p>
+                  <p className="text-gray-900 mt-1">{selected.type}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Tarih' : 'Date'}</p>
+                  <p className="text-gray-900 mt-1">{selected.issueDate}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{lang === 'tr' ? 'Vade' : 'Due'}</p>
+                  <p className="text-gray-900 mt-1">{selected.dueDate || '—'}</p>
+                </div>
+              </div>
+
+              {/* Items */}
+              {selected.items && selected.items.length > 0 && (
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">{lang === 'tr' ? 'Kalemler' : 'Items'}</p>
+                  <div className="space-y-1.5">
+                    {selected.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-sm gap-3">
+                        <span className="text-gray-700 truncate">
+                          {item.description}
+                          {item.quantity > 1 && <span className="text-gray-400"> ×{item.quantity}</span>}
+                        </span>
+                        <span className="text-gray-900 shrink-0">{formatCurrency(item.total, selected.currency)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Totals */}
+              <div className="border-t border-gray-100 pt-3 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">{lang === 'tr' ? 'Ara Toplam' : 'Subtotal'}</span>
+                  <span className="text-gray-900">{formatCurrency(selected.subtotal, selected.currency)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">KDV</span>
+                  <span className="text-gray-900">{formatCurrency(selected.totalVat, selected.currency)}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold pt-1">
+                  <span className="text-gray-900">{lang === 'tr' ? 'Genel Toplam' : 'Total'}</span>
+                  <span className="text-violet-600">{formatCurrency(selected.totalAmount, selected.currency)}</span>
+                </div>
+              </div>
+
+              {/* PDF */}
+              <button
+                onClick={() => { exportInvoicePDF(selected, lang).catch((err) => console.error('PDF export failed', err)); }}
+                className="w-full inline-flex items-center justify-center gap-2 remo-gradient text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <Download className="w-4 h-4" />
+                {lang === 'tr' ? 'PDF İndir' : 'Download PDF'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

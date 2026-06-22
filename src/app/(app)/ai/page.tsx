@@ -63,7 +63,6 @@ export default function AIPage() {
   const handleAnalyze = async (content?: string) => {
     const textToAnalyze = content || text;
     if (!textToAnalyze.trim()) { setError(lang === 'tr' ? 'Lütfen analiz edilecek metin girin.' : 'Please provide text to analyze.'); return; }
-    if (!settings.apiKey) { setError(lang === 'tr' ? 'Lütfen Ayarlar\'da API anahtarınızı ekleyin.' : 'Please add your API key in Settings.'); return; }
 
     setLoading(true);
     setError('');

@@ -242,35 +242,20 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        {/* AI Provider */}
+        {/* AI Status */}
         <Card title={t('set.ai', lang)}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'tr' ? 'Sağlayıcı' : 'Provider'}</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {([
-                  { value: 'anthropic' as const, label: 'Claude Sonnet', note: lang === 'tr' ? 'Önerilen' : 'Recommended' },
-                  { value: 'openai' as const, label: 'OpenAI GPT-4o', note: lang === 'tr' ? 'Alternatif' : 'Alternative' },
-                  { value: 'gemini' as const, label: 'Google Gemini', note: lang === 'tr' ? 'Ücretsiz' : 'Free tier' },
-                ]).map(({ value, label, note }) => (
-                  <button key={value} onClick={() => updateSettings({ apiProvider: value })}
-                    className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg border text-sm font-medium transition-colors ${
-                      settings.apiProvider === value ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}>
-                    <span className="text-xs">{label}</span>
-                    <span className={`text-[10px] ${value === 'anthropic' ? 'text-green-600' : 'text-gray-400'}`}>{note}</span>
-                  </button>
-                ))}
-              </div>
+          <div className="flex items-start gap-3 rounded-xl bg-emerald-50 border border-emerald-100 p-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('set.apiKey', lang)}</label>
-              <input type="password" value={settings.apiKey}
-                onChange={(e) => updateSettings({ apiKey: e.target.value })}
-                placeholder={settings.apiProvider === 'gemini' ? 'AIza...' : settings.apiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
-              <p className="text-xs text-gray-400 mt-1">
-                {lang === 'tr' ? 'API anahtarınız tarayıcınızda yerel olarak saklanır.' : 'Your API key is stored locally in your browser.'}
+              <p className="text-sm font-medium text-emerald-900">
+                {lang === 'tr' ? 'AI hazır — kurulum gerekmez' : 'AI is ready — no setup needed'}
+              </p>
+              <p className="text-xs text-emerald-700 mt-1">
+                {lang === 'tr'
+                  ? 'Fatura okuma ve analiz yapay zekâsı dahili olarak çalışır. Kendi API anahtarınızı eklemenize gerek yok — sadece faturanızı yükleyin.'
+                  : 'Invoice reading and analysis run built-in. No need to add your own API key — just upload your invoice.'}
               </p>
             </div>
           </div>

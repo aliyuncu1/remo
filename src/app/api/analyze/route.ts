@@ -46,6 +46,44 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
   throw new Error('No available Gemini model found. Check your API key at https://aistudio.google.com/apikey');
 }
 
+async function callOpenAICompatible(
+  prompt: string,
+  apiKey: string,
+  baseUrl: string,
+  models: string[],
+  label: string
+): Promise<string> {
+  let lastError = '';
+  for (const model of models) {
+    const res = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 4096,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) return text;
+    }
+
+    const err = await res.json().catch(() => ({}));
+    const msg = err.error?.message || err.message || '';
+    lastError = msg;
+    if (res.status === 404 || msg.includes('not found') || msg.includes('unknown_model') || msg.includes('decommissioned')) continue;
+    if (res.status === 429 || msg.toLowerCase().includes('rate')) {
+      throw new Error(`${label} rate limit reached. Wait a moment and try again.`);
+    }
+    throw new Error(msg || `${label} API error: ${res.status}`);
+  }
+  throw new Error(lastError || `No available ${label} model found.`);
+}
+
 async function callAnthropic(prompt: string, apiKey: string): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -126,7 +164,21 @@ export async function POST(req: NextRequest) {
 
     let result: string;
 
-    if (resolvedProvider === 'gemini') {
+    if (resolvedProvider === 'github') {
+      result = await callOpenAICompatible(
+        prompt, resolvedKey,
+        'https://models.github.ai/inference/chat/completions',
+        ['openai/gpt-4o', 'openai/gpt-4o-mini'],
+        'GitHub Models'
+      );
+    } else if (resolvedProvider === 'groq') {
+      result = await callOpenAICompatible(
+        prompt, resolvedKey,
+        'https://api.groq.com/openai/v1/chat/completions',
+        ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'],
+        'Groq'
+      );
+    } else if (resolvedProvider === 'gemini') {
       result = await callGemini(prompt, resolvedKey);
     } else if (resolvedProvider === 'anthropic') {
       result = await callAnthropic(prompt, resolvedKey);
