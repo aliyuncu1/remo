@@ -110,9 +110,6 @@ export default function DashboardPage() {
           <Link href="/invoices/capture" className="inline-flex items-center gap-2 remo-gradient text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
             <Camera className="w-4 h-4" /> {lang === 'tr' ? 'Fatura Yakala' : 'Capture Invoice'}
           </Link>
-          <Link href="/ai" className="hidden md:inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">
-            <Bot className="w-4 h-4" /> {t('dash.aiAnalysis', lang)}
-          </Link>
         </div>
       </div>
 

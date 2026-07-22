@@ -37,14 +37,16 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
   const overdueCount = invoices.filter((i) => i.status === 'overdue').length;
 
+  // Focused core: capture invoices, manage them, simple overview. The parked
+  // items below still work as routes — just hidden from nav to keep it simple.
   const navItems = [
     { href: '/dashboard', label: t('nav.dashboard', lang), icon: LayoutDashboard, badge: 0 },
     { href: '/invoices', label: t('nav.invoices', lang), icon: Receipt, badge: overdueCount },
-    { href: '/orders', label: t('nav.orders', lang), icon: ShoppingCart, badge: 0 },
-    { href: '/suppliers', label: t('nav.suppliers', lang), icon: Truck, badge: 0 },
-    { href: '/customers', label: t('nav.customers', lang), icon: Users, badge: 0 },
+    // PARKED — { href: '/orders', label: t('nav.orders', lang), icon: ShoppingCart, badge: 0 },
+    // PARKED — { href: '/suppliers', label: t('nav.suppliers', lang), icon: Truck, badge: 0 },
+    // PARKED — { href: '/customers', label: t('nav.customers', lang), icon: Users, badge: 0 },
     { href: '/reports', label: t('nav.reports', lang), icon: BarChart3, badge: 0 },
-    { href: '/ai', label: t('nav.ai', lang), icon: Bot, badge: 0 },
+    // PARKED — { href: '/ai', label: t('nav.ai', lang), icon: Bot, badge: 0 },
     { href: '/settings', label: t('nav.settings', lang), icon: Settings, badge: 0 },
   ];
 
