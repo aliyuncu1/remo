@@ -90,10 +90,6 @@ export default function InvoiceCapturePage() {
   const editInput =
     'w-full mt-1 px-2 py-1.5 border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500';
 
-  // Focused version: only camera/upload/manual are shown. Flip to true to
-  // bring back the WhatsApp / Gmail / email / share channels once ready.
-  const SHOW_PARKED_CHANNELS = false;
-
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -361,7 +357,6 @@ export default function InvoiceCapturePage() {
               </div>
             </button>
 
-            {SHOW_PARKED_CHANNELS && (<>
             {/* Gmail */}
             <button
               onClick={() => router.push('/invoices/import')}
@@ -429,7 +424,6 @@ export default function InvoiceCapturePage() {
                 <p className="text-[10px] text-violet-600 font-mono mt-1">fatura@remo.app</p>
               </div>
             </button>
-            </>)}
 
             {/* Manual entry */}
             <button
@@ -451,8 +445,7 @@ export default function InvoiceCapturePage() {
               </div>
             </button>
 
-            {SHOW_PARKED_CHANNELS && (
-            /* Mobile share */
+            {/* Mobile share */}
             <div className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 text-left opacity-75">
               <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                 <Smartphone className="w-6 h-6 text-gray-400" />
@@ -471,7 +464,6 @@ export default function InvoiceCapturePage() {
                 </span>
               </div>
             </div>
-            )}
           </div>
 
           {/* AI Powered badge */}
